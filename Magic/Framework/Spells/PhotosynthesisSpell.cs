@@ -30,7 +30,7 @@ namespace Magic.Framework.Spells
 
         public override bool CanCast(Farmer player, int level)
         {
-            return base.CanCast(player, level) && player.hasItemInInventory(SObject.prismaticShardIndex, 1);
+            return base.CanCast(player, level) && player.Items.ContainsId(SObject.prismaticShardID, 1);
         }
 
         public override IActiveEffect OnCast(Farmer player, int level, int targetX, int targetY)
@@ -64,7 +64,7 @@ namespace Magic.Framework.Spells
 
             foreach (GameLocation location in Game1.locations
                 .Concat(
-                    from location in Game1.locations.OfType<BuildableGameLocation>()
+                    from location in Game1.locations.Where(location => location.IsBuildableLocation())
                     from building in location.buildings
                     where building.indoors.Value != null
                     select building.indoors.Value
@@ -98,8 +98,12 @@ namespace Magic.Framework.Spells
                                 tree.daysUntilMature.Value = Math.Max(0, tree.daysUntilMature.Value - 7);
                                 tree.growthStage.Value = tree.daysUntilMature.Value > 0 ? (tree.daysUntilMature.Value > 7 ? (tree.daysUntilMature.Value > 14 ? (tree.daysUntilMature.Value > 21 ? 0 : 1) : 2) : 3) : 4;
                             }
-                            else if (!tree.stump.Value && tree.growthStage.Value == 4 && (Game1.currentSeason == tree.fruitSeason.Value || loc.Name == "Greenhouse"))
-                                tree.fruitsOnTree.Value = 3;
+                            else if (!tree.stump.Value && tree.growthStage.Value == 4 && tree.IsInSeasonHere())
+                            {
+                                for (int i = 0; i < FruitTree.maxFruitsOnTrees; ++i) {
+                                    tree.TryAddFruit();
+                                }
+                            }
                             break;
 
                         case Tree tree:
@@ -113,10 +117,10 @@ namespace Magic.Framework.Spells
                 {
                     if (obj is IndoorPot pot)
                         this.GrowHoeDirt(pot.hoeDirt.Value);
-                }    
+                }
             }
 
-            player.consumeObject(SObject.prismaticShardIndex, 1);
+            player.netItems.Value.ReduceId(SObject.prismaticShardID, 1);
             return null;
         }
 
@@ -126,7 +130,7 @@ namespace Magic.Framework.Spells
             {
                 dirt.crop.currentPhase.Value = Math.Min(dirt.crop.phaseDays.Count - 1, dirt.crop.currentPhase.Value + 1);
                 dirt.crop.dayOfCurrentPhase.Value = 0;
-                if (dirt.crop.regrowAfterHarvest.Value != -1 && dirt.crop.currentPhase.Value == dirt.crop.phaseDays.Count - 1)
+                if (dirt.crop.RegrowsAfterHarvest() && dirt.crop.currentPhase.Value == dirt.crop.phaseDays.Count - 1)
                     dirt.crop.fullyGrown.Value = true;
             }
         }

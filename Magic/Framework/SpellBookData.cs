@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using SpaceShared;
 using StardewValley;
+using StardewValley.Mods;
 
 namespace Magic.Framework
 {

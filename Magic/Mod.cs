@@ -34,7 +34,7 @@ namespace Magic
 
         public Api Api;
 
-        private MapEditor editor;
+        private MapEditor Editor;
 
         /*********
         ** Public methods
@@ -75,7 +75,7 @@ namespace Magic
         /// <param name="e">The event arguments.</param>
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
         {
-            this.editor = new(Mod.Config, this.Helper.ModContent, HasStardewValleyExpanded);
+            this.Editor = new(Mod.Config, this.Helper.ModContent, HasStardewValleyExpanded);
             this.Helper.Events.Content.AssetRequested += this.OnAssetRequested;
 
             // hook Generic Mod Config Menu
@@ -238,7 +238,7 @@ namespace Magic
 
         private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
         {
-            this.editor.TryEdit(e);
+            this.Editor.TryEdit(e);
         }
 
         /// <inheritdoc cref="IGameLoopEvents.SaveLoaded"/>

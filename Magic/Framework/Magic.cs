@@ -70,8 +70,10 @@ namespace Magic.Framework
             events.Player.Warped += Magic.OnWarped;
 
             SpaceEvents.OnItemEaten += Magic.OnItemEaten;
-            SpaceEvents.ActionActivated += Magic.ActionTriggered;
             Networking.RegisterMessageHandler(Magic.MsgCast, Magic.OnNetworkCast);
+
+            GameLocation.RegisterTileAction("MagicAltar", OnAltarClicked);
+            GameLocation.RegisterTileAction("MagicRadio", OnRadioClicked);
 
             events.Display.RenderingHud += Magic.OnRenderingHud;
             events.Display.RenderedHud += Magic.OnRenderedHud;
@@ -354,7 +356,7 @@ namespace Magic.Framework
                     I18n.Event_Wizard_9(),
                     I18n.Event_Wizard_Abovehead()
                 );
-                e.NewLocation.currentEvent = new Event(eventStr, MagicConstants.LearnedMagicEventId);
+                e.NewLocation.currentEvent = new Event(eventStr, null, MagicConstants.LearnedMagicEventId);
                 Game1.eventUp = true;
                 Game1.displayHUD = false;
                 Game1.player.CanMove = false;
@@ -366,22 +368,8 @@ namespace Magic.Framework
             }
         }
 
-        private static void ActionTriggered(object sender, EventArgsAction args)
-        {
-            switch (args.Action)
-            {
-                case "MagicAltar":
-                    Magic.OnAltarClicked();
-                    break;
-
-                case "MagicRadio":
-                    Magic.OnRadioClicked();
-                    break;
-            }
-        }
-
         /// <summary>Handle an interaction with the magic altar.</summary>
-        private static void OnAltarClicked()
+        private static bool OnAltarClicked(GameLocation loc, string[] args, Farmer farmer, Point tile)
         {
             if (!Magic.LearnedMagic)
                 Game1.drawObjectDialogue(I18n.Altar_ClickMessage());
@@ -390,12 +378,15 @@ namespace Magic.Framework
                 Game1.playSound("secret1");
                 Game1.activeClickableMenu = new MagicMenu();
             }
+
+            return true;
         }
 
         /// <summary>Handle an interaction with the magic radio.</summary>
-        private static void OnRadioClicked()
+        private static bool OnRadioClicked(GameLocation loc, string[] args, Farmer farmer, Point tile)
         {
             Game1.activeClickableMenu = new DialogueBox(Magic.GetRadioTextToday());
+            return true;
         }
 
         /// <summary>Get the radio station text to play today.</summary>
@@ -430,8 +421,10 @@ namespace Magic.Framework
                 Log.Warn("No item eaten for the item eat event?!?");
                 return;
             }
-            if (Game1.player.itemToEat.ParentSheetIndex == Mod.Ja.GetObjectId("Magic Elixir"))
+            if(Game1.player.itemToEat.Name == "Magic Elixir")
                 Game1.player.AddMana(Game1.player.GetMaxMana());
+            // if (Game1.player.itemToEat.ParentSheetIndex == Mod.Ja.GetObjectId("Magic Elixir"))
+            //     Game1.player.AddMana(Game1.player.GetMaxMana());
         }
     }
 }

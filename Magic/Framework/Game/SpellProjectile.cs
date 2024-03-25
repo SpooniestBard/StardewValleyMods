@@ -35,7 +35,11 @@ namespace Magic.Framework.Game
         *********/
         public SpellProjectile()
         {
-            this.NetFields.AddFields(this.Damage, this.Direction, this.Velocity, this.IsSeeking, this.TexId);
+            this.NetFields.AddField(this.Damage);
+            this.NetFields.AddField(this.Direction);
+            this.NetFields.AddField(this.Velocity);
+            this.NetFields.AddField(this.IsSeeking);
+            this.NetFields.AddField(this.TexId);
         }
 
         public SpellProjectile(Farmer source, ProjectileSpell spell, int damage, float direction, float velocity, bool isSeeking)
@@ -81,11 +85,6 @@ namespace Magic.Framework.Game
             }
         }
 
-        public override void behaviorOnCollisionWithMineWall(int tileX, int tileY)
-        {
-            //disappear(loc);
-        }
-
         public override void behaviorOnCollisionWithMonster(NPC npc, GameLocation loc)
         {
             if (npc is not Monster)
@@ -113,13 +112,15 @@ namespace Magic.Framework.Game
                 this.Disappear(loc);
         }
 
-        public override bool isColliding(GameLocation location)
+        public override bool isColliding(GameLocation location, out Character target, out TerrainFeature terrainFeature)
         {
             if (this.IsSeeking.Value)
             {
-                return location.doesPositionCollideWithCharacter(this.getBoundingBox()) != null;
+                target = location.doesPositionCollideWithCharacter(this.getBoundingBox());
+                terrainFeature = null;
+                return target != null;
             }
-            else return base.isColliding(location);
+            else return base.isColliding(location, out target, out terrainFeature);
         }
 
         public override Rectangle getBoundingBox()
@@ -138,7 +139,8 @@ namespace Magic.Framework.Game
                 }
                 else
                 {
-                    Vector2 unit = new Vector2(this.SeekTarget.GetBoundingBox().Center.X + 32, this.SeekTarget.GetBoundingBox().Center.Y + 32) - this.position;
+
+                    Vector2 unit = new Vector2(this.SeekTarget.GetBoundingBox().Center.X + 32 - this.position.X, this.SeekTarget.GetBoundingBox().Center.Y + 32 - this.position.Y);
                     unit.Normalize();
 
                     this.xVelocity.Value = unit.X * this.Velocity.Value;
@@ -183,7 +185,7 @@ namespace Magic.Framework.Game
         private void Disappear(GameLocation loc)
         {
             if (this.Spell?.SoundHit != null)
-                loc.LocalSoundAtPixel(this.Spell.SoundHit, this.position.Value);
+                loc.localSound(this.Spell.SoundHit, this.position.Value);
 
             //Game1.createRadialDebris(loc, 22 + rand.Next( 2 ), ( int ) position.X / Game1.tileSize, ( int ) position.Y / Game1.tileSize, 3 + rand.Next(5), false);
             Game1.createRadialDebris(loc, this.TexId.Value, Game1.getSourceRectForStandardTileSheet(Projectile.projectileSheet, 0), 4, (int)this.position.X, (int)this.position.Y, 6 + SpellProjectile.Rand.Next(10), (int)(this.position.Y / (double)Game1.tileSize) + 1, new Color(255, 255, 255, 8 + SpellProjectile.Rand.Next(64)), 2.0f);

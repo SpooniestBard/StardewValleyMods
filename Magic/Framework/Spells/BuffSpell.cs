@@ -1,6 +1,9 @@
 using Magic.Framework.Schools;
 using SpaceCore;
+using StardewModdingAPI.Events;
 using StardewValley;
+using StardewValley.Buffs;
+using StardewValley.GameData.Buffs;
 
 namespace Magic.Framework.Spells
 {
@@ -16,11 +19,8 @@ namespace Magic.Framework.Spells
         {
             if (player == Game1.player)
             {
-                foreach (var buff in Game1.buffsDisplay.otherBuffs)
-                {
-                    if (buff.source == "spell:life:buff")
-                        return false;
-                }
+                if (player.hasBuff("spell:life:buff"))
+                    return false;
             }
 
             return base.CanCast(player, level);
@@ -36,14 +36,8 @@ namespace Magic.Framework.Spells
             if (player != Game1.player)
                 return null;
 
-            foreach (var buff in Game1.buffsDisplay.otherBuffs)
-            {
-                if (buff.source == "spell:life:buff")
-                    return null;
-            }
-
-            Game1.player.removeBuffAttributes();
-            Game1.player.attack = 0;
+            if (player.hasBuff("spell:life:buff"))
+                return null;
 
             int l = level + 1;
             int farm = l, fish = l, mine = l, luck = l, forage = l, def = 0 /*1*/, atk = 2;
@@ -54,7 +48,17 @@ namespace Magic.Framework.Spells
                 _ => atk
             };
 
-            Game1.buffsDisplay.addOtherBuff(new Buff(farm, fish, mine, 0, luck, forage, 0, 0, 0, 0, def, atk, 60 + level * 120, "spell:life:buff", "Buff (spell)"));
+            var buffAttrs = new BuffAttributesData{
+                FarmingLevel = farm,
+                FishingLevel = fish,
+                MiningLevel = mine,
+                LuckLevel = luck,
+                ForagingLevel = forage,
+                Defense = def,
+                Attack = atk
+            };
+
+            Game1.player.applyBuff(new Buff("spell:life:buff", "Buff (spell)", null, (60 + level * 120) * 1000, null, -1, new BuffEffects(buffAttrs)));
             player.AddCustomSkillExperience(Magic.Skill, 10);
             return null;
         }

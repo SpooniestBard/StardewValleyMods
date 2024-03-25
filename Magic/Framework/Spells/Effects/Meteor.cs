@@ -46,7 +46,7 @@ namespace Magic.Framework.Spells.Effects
 
             // trigger explosion
             {
-                this.Loc.LocalSoundAtPixel("explosion", this.Position);
+                this.Loc.localSound("explosion", this.Position);
                 for (int i = 0; i < 10; ++i)
                 {
                     for (int x = -i; x <= i; ++x)
@@ -60,7 +60,7 @@ namespace Magic.Framework.Spells.Effects
                     if (npc is Monster mob)
                     {
                         float rad = 8 * 64;
-                        if (Vector2.Distance(mob.position, new Vector2(this.Position.X, this.Position.Y)) <= rad)
+                        if (Vector2.Distance(mob.position.Value, new Vector2(this.Position.X, this.Position.Y)) <= rad)
                         {
                             // TODO: Use location damage method for xp and quest progress
                             mob.takeDamage(300, 0, 0, false, 0, this.Source);
