@@ -90,7 +90,7 @@ namespace Magic.Framework.Game
             if (npc is not Monster)
                 return;
 
-            bool didDmg = loc.damageMonster(npc.GetBoundingBox(), this.Damage.Value, this.Damage.Value + 1, false, this.Source);
+            bool didDmg = loc.damageMonster(npc.GetBoundingBox(), this.Damage.Value, this.Damage.Value + 1, false, this.Source, true);
             if (this.Source != null && didDmg)
                 this.Source.AddCustomSkillExperience(Magic.Skill, this.Damage.Value / ((this.theOneWhoFiredMe.Get(loc) as Farmer).CombatLevel + 1));
             this.Disappear(loc);
@@ -139,8 +139,7 @@ namespace Magic.Framework.Game
                 }
                 else
                 {
-
-                    Vector2 unit = new Vector2(this.SeekTarget.GetBoundingBox().Center.X + 32 - this.position.X, this.SeekTarget.GetBoundingBox().Center.Y + 32 - this.position.Y);
+                    Vector2 unit = new Vector2(this.SeekTarget.GetBoundingBox().Center.X + 32, this.SeekTarget.GetBoundingBox().Center.Y + 32) - this.position.Value;
                     unit.Normalize();
 
                     this.xVelocity.Value = unit.X * this.Velocity.Value;
