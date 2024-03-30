@@ -1,3 +1,4 @@
+using System;
 using Microsoft.CodeAnalysis;
 using Microsoft.Xna.Framework;
 using StardewValley;
@@ -40,7 +41,7 @@ namespace Magic.Framework
         /// <param name="audioName">The audio cue name to play.</param>
         public static void LocalSound(this Farmer player, string audioName)
         {
-            player?.currentLocation.localSound(audioName, player.Position);
+            player?.currentLocation.playSound(audioName, player.Tile);
         }
     }
 }
